@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {ErrorNotification, NotificationType, SlidingPanel} from 'argo-ui';
+//import {ErrorNotification, NotificationType, SlidingPanel} from 'argo-ui';
 
 ((window) => {
   const component = () => {
