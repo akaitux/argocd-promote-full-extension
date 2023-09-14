@@ -17,10 +17,8 @@ const proxyConf = {
 const config = {
     entry: './src/index.tsx',
     output: {
-        filename: 'extension-argo-promote.js',
+        filename: 'extensions-argopromote.js',
         path: __dirname + '/dist/promote-rollout',
-        libraryTarget: "window",
-        library: ["tmp", "extensions"]
     },
 
     resolve: {

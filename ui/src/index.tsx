@@ -1,10 +1,10 @@
 import * as React from 'react';
-// import applications from './app/applications';
+import applications from './app/applications';
 
 ((window) => {
-  // const component = () => {
-  //   return applications.component;
-  // };
+  const componentt = () => {
+    return applications.component;
+  };
   const component = () => {
     return React.createElement(
       "div",
