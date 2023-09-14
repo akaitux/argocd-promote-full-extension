@@ -105,3 +105,5 @@ export const ApplicationsPromoteFullPanel = ({show, apps, hide}: {show: boolean;
         </Consumer>
     );
 };
+
+export const component = ApplicationsPromoteFullPanel;
