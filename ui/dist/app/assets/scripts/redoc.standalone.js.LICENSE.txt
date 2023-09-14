@@ -1,1 +1,0 @@
-/*! For license information please see redoc.standalone.js.LICENSE.txt */
