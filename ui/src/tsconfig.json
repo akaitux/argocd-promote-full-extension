@@ -1,24 +1,27 @@
 {
     "compilerOptions": {
-        "outDir": "./../bundle",
+        "outDir": "./../../dist/app",
         "sourceMap": true,
         "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es6",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "target": "es5",
         "jsx": "react",
-        "esModuleInterop": true,
         "experimentalDecorators": true,
-        "noUnusedLocals": false,
+        "allowSyntheticDefaultImports": true,
+        "noUnusedLocals": true,
         "declaration": false,
-        "skipLibCheck": true,
         "lib": [
             "es2017",
             "dom"
-        ],
-        "typeRoots": [
-            "./node_modules/@types"
         ]
     },
-    "include": ["./**/*"],
-    "exclude": ["node_modules", "./**/*.test.ts", "./**/*.test.tsx", "./**/*.stories.tsx"]
+    "include": [
+        "./**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "./**/*.test.ts",
+        "./**/*.test.tsx"
+    ]
 }
