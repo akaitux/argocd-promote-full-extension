@@ -1,8 +1,9 @@
-import * as React from 'react';
 import applications from './app/applications';
 
 ((window) => {
-  const component = applications.component;
+  const component = () => {
+    return applications.component;
+  };
   window?.extensionsAPI?.registerSystemLevelExtension(
     component,
     "Test Ext",

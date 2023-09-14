@@ -17,15 +17,19 @@ const proxyConf = {
 const config = {
     entry: './src/index.tsx',
     output: {
-        filename: '[name].[contenthash].js',
-        chunkFilename: '[name].[contenthash].chunk.js',
-        path: __dirname + '/dist/app'
+        filename: 'extension-argo-promote.js',
+        path: __dirname + '/dist/promote-rollout',
+        libraryTarget: "window",
+        library: ["tmp", "extensions"]
     },
 
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json'],
         alias: { react: require.resolve('react') },
         fallback: { fs: false }
+    },
+    externals: {
+    react: 'React',
     },
     ignoreWarnings: [{
         module: new RegExp('/node_modules/argo-ui/.*')
@@ -67,7 +71,6 @@ const config = {
                 version: process.env.ARGO_VERSION || 'latest'
             })
         }),
-        new HtmlWebpackPlugin({ template: 'src/app/index.html' }),
         new CopyWebpackPlugin({
             patterns: [{
                     from: 'src/assets',

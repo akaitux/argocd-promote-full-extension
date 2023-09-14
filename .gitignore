@@ -1,6 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 *.log
 
+dist
+
 ui/node_modules
 ui/dist/resources
 ui/package-lock.json
