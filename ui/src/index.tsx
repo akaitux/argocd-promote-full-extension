@@ -1,10 +1,11 @@
 import * as React from 'react';
-import applications from './app/applications';
+import {ApplicationsContainer} from './app/applications/components/applications-container';
+
+const componentt = () => {
+    return ApplicationsContainer;
+};
 
 ((window) => {
-  const componentt = () => {
-    return applications.component;
-  };
   const component = () => {
     return React.createElement(
       "div",
@@ -19,3 +20,4 @@ import applications from './app/applications';
     "fa-flask"
   );
 })(window);
+
