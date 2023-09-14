@@ -51,7 +51,7 @@
     },
     "scripts": {
         "start": "webpack serve --config ./webpack.config.js",
-        "build": "rm -rf dist && NODE_OPTIONS=--openssl-legacy-provider webpack --config ./webpack.config.js &&  tar -C dist -cvf dist/extension.tar . && rm -rf dist/promote-rollout"
+        "build": "rm -rf dist && NODE_OPTIONS=--openssl-legacy-provider webpack --config ./webpack.config.js &&  tar -C dist -cvf dist/extension.tar . && rm -rf dist/extension-argopromote.js"
     },
     "devDependencies": {
     "@babel/core": "^7.7.2",

@@ -18,7 +18,7 @@ const config = {
     entry: './src/index.tsx',
     output: {
         filename: 'extensions-argopromote.js',
-        path: __dirname + '/dist/promote-rollout',
+        path: __dirname + '/dist/extension-argopromote.js',
     },
 
     resolve: {
@@ -68,6 +68,9 @@ const config = {
             'SYSTEM_INFO': JSON.stringify({
                 version: process.env.ARGO_VERSION || 'latest'
             })
+        }),
+        new webpack.optimize.LimitChunkCountPlugin({
+          maxChunks: 1, // disable creating additional chunks
         }),
         new CopyWebpackPlugin({
             patterns: [{
