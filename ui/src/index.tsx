@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {ApplicationsContainer} from './applications/components/applications-container';
+import applications from './applications';
 
 ((window) => {
-  const component = ApplicationsContainer;
+  const component = applications.component;
   window?.extensionsAPI?.registerSystemLevelExtension(
     component,
     "Test Ext",
