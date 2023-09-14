@@ -1,5 +1,5 @@
 import * as React from 'react';
-import applications from './applications';
+import applications from './app/applications';
 
 ((window) => {
   const component = applications.component;
