@@ -9,7 +9,7 @@ import * as React from 'react';
       "Hello World"
     );
   };
-  window.extensionsAPI.registerSystemLevelExtension(
+  window?.extensionsAPI?.registerSystemLevelExtension(
     component,
     "Test Ext",
     "/hello",
