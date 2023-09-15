@@ -2,6 +2,8 @@ import * as React from "react";
 import Moment from "react-moment";
 import { ApplicationSet } from "./models/applicationset";
 import { HealthStatus, Tree } from "./models/tree";
+import {combineLatest, from, merge, Observable} from 'rxjs';
+import {services} from "./lib/applications-service"
 
 const MAP_STATUS = {
   Healthy: { name: "fa-heart", spin: false, color: "rgb(24, 190, 148)" },
@@ -39,6 +41,13 @@ export const Extension = (props: { tree: Tree; resource: ApplicationSet }) => {
   );
   console.log("YO");
   console.log(items);
+  for (const item of items) {
+        let application = services.applications.get(item.name, item.namespace).catch(e => {
+            console.log(e);
+
+        });
+        console.log(application);
+    }
 
   return (
     <div>
