@@ -2,7 +2,6 @@ import * as React from "react";
 import {ErrorNotification, NotificationType, SlidingPanel} from 'argo-ui';
 import {useEffect, useState} from 'react';
 import {Form, FormApi} from 'react-form';
-import {ProgressPopup} from './lib/components/progress/progress-popup'
 import Moment from "react-moment";
 import { ApplicationSet } from "./models/applicationset";
 import { Application, ApplicationTree, ResourceRef, ApplicationStatus} from "./models/models";
@@ -50,22 +49,94 @@ async function getApplications(nodes: ResourceRef[]) {
     return applications
 }
 
+
+async function refreshAll(apps: Application[]) {
+    if (apps.length === 0) {
+        //ctx.notifications.show({content: `No apps selected`, type: NotificationType.Error});
+        console.log("No apps selected")
+        return;
+    }
+    console.log("Apps for refresh:")
+    console.log(apps)
+}
+
+async function promoteAll(apps: Application[]) {
+    if (apps.length === 0) {
+        //ctx.notifications.show({content: `No apps selected`, type: NotificationType.Error});
+        console.log("No apps selected")
+        return;
+    }
+    console.log("Apps for promote:")
+    console.log(apps)
+    const promoteActions = [];
+    for (const app of apps) {
+        const resourcesTree = await services.applications.resourceTree(app.metadata.name, app.metadata.namespace).catch(e => {
+            // ctx.notifications.show({
+            //     content: <ErrorNotification title={`Error while fetch resource tree ${app.metadata.name}`} e={e} />,
+            //     type: NotificationType.Error
+            // });
+            console.log('Error while fetch resource tree', e)
+        });
+        if (! resourcesTree) {
+            console.log("Empty node tree for app", app.metadata.name)
+            continue
+        }
+        if (! resourcesTree.nodes) {
+            console.log("No nodes in app", app.metadata.name)
+            continue
+        }
+        for (const node of resourcesTree.nodes ) {
+            if (node.kind === "Rollout") {
+                const promoteAction = async () => {
+                    await services.applications.runResourceAction(
+                        app.metadata.name,
+                        app.metadata.namespace,
+                        node,
+                        "promote-full"
+                    ).catch(e => {
+                        // ctx.notifications.show({
+                        //     content: <ErrorNotification title={`Unable to promote ${app.metadata.name}`} e={e} />,
+                        //     type: NotificationType.Error
+                        // });
+                        console.log("Unable to promote", app.metadata.name, e)
+                    })
+                }
+                promoteActions.push(promoteAction());
+            }
+        }
+        await Promise.all(promoteActions);
+    }
+}
+
+async function syncAll(apps: Application[]) {
+    if (apps.length === 0) {
+        //ctx.notifications.show({content: `No apps selected`, type: NotificationType.Error});
+        console.log("No apps selected")
+        return;
+    }
+    console.log("Apps for sync:")
+    console.log(apps)
+}
+
 export const Extension = (props: { tree: Tree; resource: ApplicationSet }) => {
 
   const [apps, setApps] = useState<Application[]>([]);
   useEffect(() => {
-    var items = props.tree.nodes.filter((item) =>
-      // filter the one owned by the ApplicationSet
-      item.parentRefs?.find(
-        (parentRef) => parentRef.uid === props.resource.metadata.uid
-      )
-    );
-    const fetchData = async () => {
-      await getApplications(items).then(res => {
-         setApps(res);
-       });
-    };
-    fetchData();
+    const intervalId = setInterval(() => {
+        var appset_apps = props.tree.nodes.filter((item) =>
+          // filter the one owned by the ApplicationSet
+          item.parentRefs?.find(
+            (parentRef) => parentRef.uid === props.resource.metadata.uid
+          )
+        );
+        const fetchData = async () => {
+          await getApplications(appset_apps).then(res => {
+             setApps(res);
+           });
+        };
+        fetchData();
+    }, 1000)
+    return () => clearInterval(intervalId);
   }, []);
 
   if (apps) {
@@ -73,16 +144,10 @@ export const Extension = (props: { tree: Tree; resource: ApplicationSet }) => {
   }
 }
 
-interface Progress {
-    percentage: number;
-    title: string;
-}
-
 
 export const Child = (props: {tree: Tree, resource: ApplicationSet, applications: Application[]}) => {
 
     const [form, setForm] = React.useState<FormApi>(null);
-    const [progress, setProgress] = React.useState<Progress>(null);
     return (
       <div>
         <div
@@ -128,21 +193,26 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
           </div>
         </div>
 
-    <button className='argo-button argo-button--base' onClick={() => form.submitForm(null)}>
-        Promote-Full
+    <button
+        className='argo-button argo-button--base'
+        onClick={() => refreshAll(props.applications)}
+    >
+        Refresh All
     </button>{' '}
 
-    <Form
-        onSubmit={async (params: any) => {
-            const selectedApps = props.applications;
-            if (selectedApps.length === 0) {
-                //ctx.notifications.show({content: `No apps selected`, type: NotificationType.Error});
-                console.log("No apps selected")
-                return;
-            }
-        }}
-        getApi={setForm}>
-    </Form>
+    <button
+        className='argo-button argo-button--base'
+        onClick={() => syncAll(props.applications)}
+    >
+        Sync All
+    </button>{' '}
+
+    <button
+        className='argo-button argo-button--base'
+        onClick={() => promoteAll(props.applications)}
+    >
+        Promote All
+    </button>{' '}
 
 
 
