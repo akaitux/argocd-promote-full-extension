@@ -4,10 +4,12 @@ import {useEffect, useState} from 'react';
 import {Form, FormApi} from 'react-form';
 import Moment from "react-moment";
 import { ApplicationSet } from "./models/applicationset";
-import { Application, ApplicationTree, ResourceRef, ApplicationStatus} from "./models/models";
+import { Application, ResourceAction, ResourceRef, ApplicationStatus} from "./models/models";
 import { HealthStatus, Tree } from "./models/tree";
 import {combineLatest, from, merge, Observable} from 'rxjs';
 import {services} from "./lib/applications-service"
+import {getAppDefaultSource} from "./lib/utils"
+import {ApplicationManualSyncFlags, ApplicationSyncOptions, FORCE_WARNING, SyncFlags} from './lib/application-sync-options';
 
 const MAP_STATUS = {
   Healthy: { name: "fa-heart", spin: false, color: "rgb(24, 190, 148)" },
@@ -34,6 +36,9 @@ const MAP_STATUS = {
     color: "rgb(204, 214, 221)",
   },
 };
+
+
+enum AppAction {PROMOTE, SYNC, REFRESH}
 
 
 function renderAppStatus(app: Application) {
@@ -70,7 +75,6 @@ async function getApplications(nodes: ResourceRef[]) {
             applications.push(application);
         }
     }
-    console.log(applications)
     return applications
 }
 
@@ -81,9 +85,11 @@ async function refreshAll(apps: Application[]) {
         console.log("No apps selected")
         return;
     }
-    console.log("Apps for refresh:")
-    console.log(apps)
+    await doAppsAction(apps, AppAction.REFRESH)
 }
+
+
+
 
 async function promoteAll(apps: Application[]) {
     if (apps.length === 0) {
@@ -91,9 +97,19 @@ async function promoteAll(apps: Application[]) {
         console.log("No apps selected")
         return;
     }
+    await doAppsAction(apps, AppAction.PROMOTE)
+}
+
+
+async function doAppsAction(apps: Application[], action: AppAction) {
+    if (apps.length === 0) {
+        //ctx.notifications.show({content: `No apps selected`, type: NotificationType.Error});
+        console.log("No apps selected")
+        return;
+    }
     console.log("Apps for promote:")
     console.log(apps)
-    const promoteActions = [];
+    const actions = [];
     for (const app of apps) {
         const resourcesTree = await services.applications.resourceTree(app.metadata.name, app.metadata.namespace).catch(e => {
             // ctx.notifications.show({
@@ -112,26 +128,42 @@ async function promoteAll(apps: Application[]) {
         }
         for (const node of resourcesTree.nodes ) {
             if (node.kind === "Rollout") {
-                const promoteAction = async () => {
-                    await services.applications.runResourceAction(
-                        app.metadata.name,
-                        app.metadata.namespace,
-                        node,
-                        "promote-full"
-                    ).catch(e => {
+                var fn: Promise<any>;
+                const promise = async () => {
+                    switch (action) {
+                        case AppAction.PROMOTE:
+                            fn = services.applications.runResourceAction(
+                            app.metadata.name,
+                            app.metadata.namespace,
+                            node,
+                            "promote-full");
+                            break;
+                        case AppAction.REFRESH:
+                            fn = services.applications.get(
+                                node.name,
+                                node.namespace,
+                                'hard' );
+                            break;
+                        case AppAction.SYNC:
+                            console.log("SYNC NOT REALIZED");
+                            break;
+                    }
+                    console.log(fn);
+                    await fn.catch(e => {
                         // ctx.notifications.show({
                         //     content: <ErrorNotification title={`Unable to promote ${app.metadata.name}`} e={e} />,
                         //     type: NotificationType.Error
                         // });
-                        console.log("Unable to promote", app.metadata.name, e)
+                        console.log("Error in action, ", app.metadata.name, e)
                     })
                 }
-                promoteActions.push(promoteAction());
+                actions.push(promise());
             }
         }
-        await Promise.all(promoteActions);
+        await Promise.all(actions);
     }
 }
+
 
 async function syncAll(apps: Application[]) {
     if (apps.length === 0) {
@@ -139,9 +171,9 @@ async function syncAll(apps: Application[]) {
         console.log("No apps selected")
         return;
     }
-    console.log("Apps for sync:")
-    console.log(apps)
+    await doAppsAction(apps, AppAction.SYNC)
 }
+
 
 export const Extension = (props: { tree: Tree; resource: ApplicationSet }) => {
 
@@ -172,7 +204,9 @@ export const Extension = (props: { tree: Tree; resource: ApplicationSet }) => {
 
 export const Child = (props: {tree: Tree, resource: ApplicationSet, applications: Application[]}) => {
 
-    const [form, setForm] = React.useState<FormApi>(null);
+    const [refreshForm, refreshSetForm] = React.useState<FormApi>(null);
+    const [syncForm, syncSetForm] = React.useState<FormApi>(null);
+    const [promoteForm, promoteSetForm] = React.useState<FormApi>(null);
     return (
       <div>
         <div
@@ -221,25 +255,18 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
     <br/>
     <button
         className='argo-button argo-button--base'
-        onClick={() => refreshAll(props.applications)}
-    >
-        Refresh All
-    </button>{' '}
-
-    <button
-        className='argo-button argo-button--base'
-        onClick={() => syncAll(props.applications)}
-    >
-        Sync All
-    </button>{' '}
-
-    <button
-        className='argo-button argo-button--base'
         onClick={() => promoteAll(props.applications)}
     >
         Promote All
     </button>{' '}
-
+    <Form
+        onSubmit={async (params: any) => { promoteAll(props.applications) }}
+        getApi={promoteSetForm}>
+        {formApi => (
+            <React.Fragment>
+            </React.Fragment>
+        )}
+    </Form>
 
 
     <div style={{ display: "flex", flexDirection: "column", width: "40%" }}>

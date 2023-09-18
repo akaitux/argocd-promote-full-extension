@@ -1,3 +1,6 @@
+import * as appModels from '../models/models';
+
+
 export function hashCode(str: string) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -33,4 +36,10 @@ export function isValidURL(url: string): boolean {
             return false;
         }
     }
+}
+export function getAppDefaultSource(app?: appModels.Application) {
+    if (!app) {
+        return null;
+    }
+    return app.spec.sources && app.spec.sources.length > 0 ? app.spec.sources[0] : app.spec.source;
 }
