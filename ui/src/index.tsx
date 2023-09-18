@@ -140,8 +140,8 @@ async function doAppsAction(apps: Application[], action: AppAction) {
                             break;
                         case AppAction.REFRESH:
                             fn = services.applications.get(
-                                node.name,
-                                node.namespace,
+                                app.metadata.name,
+                                app.metadata.namespace,
                                 'hard' );
                             break;
                         case AppAction.SYNC:
@@ -259,9 +259,16 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
     >
         Promote All
     </button>{' '}
+
+    <button
+        className='argo-button argo-button--base'
+        onClick={() => refreshAll(props.applications)}
+    >
+        Refresh All
+    </button>{' '}
     <Form
-        onSubmit={async (params: any) => { promoteAll(props.applications) }}
-        getApi={promoteSetForm}>
+        onSubmit={async (params: any) => { refreshAll(props.applications) }}
+        getApi={refreshSetForm}>
         {formApi => (
             <React.Fragment>
             </React.Fragment>
