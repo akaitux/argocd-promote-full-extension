@@ -27,6 +27,7 @@ const MAP_STATUS = {
     color: "rgb(118, 111, 148)",
   },
   Missing: { name: "fa-ghost", spin: false, color: "rgb(244, 192, 48)" },
+  OutOfSync: { name: "fa-arrow-alt-circle-up", spin: false, color: "rgb(244, 192, 48)" },
   Unknown: {
     name: "fa-question-circle",
     spin: false,
@@ -34,6 +35,29 @@ const MAP_STATUS = {
   },
 };
 
+
+function renderAppStatus(app: Application) {
+    var state: any
+    if (app.status.sync.status === "OutOfSync")  {
+        state = MAP_STATUS['OutOfSync']
+    } else {
+        state = MAP_STATUS[app.status.health.status]
+    }
+    return (
+        <div style={{ fontSize: ".8em" }}>
+          <i
+            qe-id="utils-health-status-title"
+            title={app.status.health.status}
+            className={`fa ${state.name}`}
+            style={{ color: state.color, marginRight: "0.3rem" }}
+          ></i>
+          <a href={`/applications/${app.metadata.name}`} title="Open application">
+            <i className="fa fa-external-link-alt"></i>
+          </a>
+        </div>
+    )
+
+}
 
 async function getApplications(nodes: ResourceRef[]) {
   var applications = new Array<Application>();
@@ -46,6 +70,7 @@ async function getApplications(nodes: ResourceRef[]) {
             applications.push(application);
         }
     }
+    console.log(applications)
     return applications
 }
 
@@ -193,6 +218,7 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
           </div>
         </div>
 
+    <br/>
     <button
         className='argo-button argo-button--base'
         onClick={() => refreshAll(props.applications)}
@@ -265,19 +291,7 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
               >
                 {item.metadata.name}
               </div>
-              <div style={{ fontSize: ".8em" }}>
-                <i
-                  qe-id="utils-health-status-title"
-                  title={item.status.health.status}
-                  className={`fa ${MAP_STATUS[item.status.health.status].name}${
-                    MAP_STATUS[item.status.health.status].spin ? " fa-spin" : ""
-                  }`}
-                  style={{ color: MAP_STATUS[item.status.health.status].color, marginRight: "0.3rem" }}
-                ></i>
-                <a href={`/applications/${item.metadata.name}`} title="Open application">
-                  <i className="fa fa-external-link-alt"></i>
-                </a>
-              </div>
+                {renderAppStatus(item)}
             </div>
             <div style={{ flexGrow: "1", alignSelf: "flex-end" }}>
               {  item.metadata.creationTimestamp ? (
