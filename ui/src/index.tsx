@@ -255,16 +255,21 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
     <br/>
     <button
         className='argo-button argo-button--base'
+        onClick={() => refreshAll(props.applications)}
+    >
+        Refresh All
+    </button>{' '}
+    <button
+        className='argo-button argo-button--base'
         onClick={() => promoteAll(props.applications)}
     >
         Promote All
     </button>{' '}
-
     <button
         className='argo-button argo-button--base'
-        onClick={() => refreshAll(props.applications)}
+        onClick={() => syncAll(props.applications)}
     >
-        Refresh All
+        Promote All
     </button>{' '}
     <Form
         onSubmit={async (params: any) => { refreshAll(props.applications) }}
@@ -274,6 +279,7 @@ export const Child = (props: {tree: Tree, resource: ApplicationSet, applications
             </React.Fragment>
         )}
     </Form>
+
 
 
     <div style={{ display: "flex", flexDirection: "column", width: "40%" }}>
